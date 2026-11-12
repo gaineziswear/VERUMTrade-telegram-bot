@@ -18,13 +18,14 @@ export function createFiatCheckout({ plan, userId, provider, idempotencyKey }) {
   return { userId: String(userId), planId: p.id, amount: p.priceUsd, currency: "USD", provider: String(provider), idempotencyKey: String(idempotencyKey), metadata: { product: "VERUM_VIP", plan_id: p.id, user_id: String(userId) } };
 }
 
-export function createStablecoinInvoice({ plan, userId, asset, network, recipient, tokenContract, now = Date.now(), ttlMs = 20 * 60_000 }) {
+export function createStablecoinInvoice({ plan, userId, asset, network, recipient, tokenContract, quoteUsdPerToken, quoteProvider, now = Date.now(), ttlMs = 20 * 60_000 }) {
   const p = normalizePlan(plan);
   const currency = String(asset ?? "").toUpperCase();
   if (!["USDT", "USDC"].includes(currency)) throw new TypeError("Stablecoin asset must be USDT or USDC");
   if (!userId || !network || !recipient || !tokenContract) throw new TypeError("User, network, recipient and canonical token contract are required");
+  if (!Number.isFinite(quoteUsdPerToken) || quoteUsdPerToken <= 0 || !quoteProvider) throw new TypeError("A positive provider-backed USD-per-token quote is required");
   if (!Number.isInteger(ttlMs) || ttlMs < 60_000) throw new RangeError("Invoice TTL must be at least one minute");
-  return { invoiceId: globalThis.crypto.randomUUID(), userId: String(userId), planId: p.id, quoteCurrency: "USD", quoteAmount: p.priceUsd, asset: currency, network: String(network), recipient: String(recipient), tokenContract: String(tokenContract), expectedAmount: p.priceUsd, state: "pending", createdAt: new Date(now).toISOString(), expiresAt: new Date(now + ttlMs).toISOString() };
+  return { invoiceId: globalThis.crypto.randomUUID(), userId: String(userId), planId: p.id, quoteCurrency: "USD", quoteAmount: p.priceUsd, asset: currency, network: String(network), recipient: String(recipient), tokenContract: String(tokenContract), quoteUsdPerToken, quoteProvider: String(quoteProvider), expectedAmount: Number((p.priceUsd / quoteUsdPerToken).toFixed(6)), state: "pending", createdAt: new Date(now).toISOString(), expiresAt: new Date(now + ttlMs).toISOString() };
 }
 
 /** observation.verified is trusted only when the adapter independently checked token, chain, destination, amount, finality and transaction status. */
@@ -60,5 +61,5 @@ export function extendVipEntitlement(current, { userId, plan, paidAt, paymentRef
   const paidTime = Date.parse(paidAt);
   const oldEnd = current?.userId === userId && current.status === "active" ? Date.parse(current.expiresAt) : NaN;
   const start = Math.max(paidTime, Number.isFinite(oldEnd) ? oldEnd : paidTime);
-  return { userId: String(userId), planId: p.id, status: "active", startsAt: new Date(paidTime).toISOString(), expiresAt: new Date(start + p.durationDays * 86_400_000).toISOString(), appliedPaymentReferences: [...(current?.appliedPaymentReferences ?? []), paymentReference], duplicate: false };
+  return { userId: String(userId), planId: p.id, status: "active", startsAt: new Date(start).toISOString(), expiresAt: new Date(start + p.durationDays * 86_400_000).toISOString(), appliedPaymentReferences: [...(current?.appliedPaymentReferences ?? []), paymentReference], duplicate: false };
 }
