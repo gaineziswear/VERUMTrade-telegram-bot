@@ -9,7 +9,7 @@ import { findAllowedStablecoinRoute, parseStablecoinNetworkAllowlist } from "../
 const plan = { id: "vip-monthly", priceUsd: 29.99, durationDays: 30, label: "VIP Monthly" };
 const invoice = () => createStablecoinInvoice({
   plan, userId: "user-42", asset: "USDC", network: "ethereum",
-  recipient: "0xabc123", tokenContract: "0xtoken123",
+  recipient: "0xabc123", tokenContract: "0xtoken123", quoteUsdPerToken: 1, quoteProvider: "test-quote-provider",
   now: Date.parse("2026-11-12T10:00:00Z")
 });
 const observation = (inv, overrides = {}) => ({
@@ -35,7 +35,14 @@ test("creates a USD-quoted USDC invoice with expiry", () => {
   assert.equal(inv.quoteCurrency, "USD");
   assert.equal(inv.asset, "USDC");
   assert.equal(inv.expectedAmount, 29.99);
+  assert.equal(inv.quoteProvider, "test-quote-provider");
   assert.ok(Date.parse(inv.expiresAt) > Date.parse(inv.createdAt));
+});
+
+test("requires a live provider-backed quote instead of assuming a one-dollar peg", () => {
+  assert.throws(() => createStablecoinInvoice({ plan, userId: "u1", asset: "USDT", network: "ethereum", recipient: "0xabc", tokenContract: "0xtoken" }), /USD-per-token quote/);
+  const inv = createStablecoinInvoice({ plan, userId: "u1", asset: "USDT", network: "ethereum", recipient: "0xabc", tokenContract: "0xtoken", quoteUsdPerToken: 0.999, quoteProvider: "pricing-adapter" });
+  assert.ok(inv.expectedAmount > inv.quoteAmount);
 });
 
 test("accepts exact verified stablecoin payment", () => {
