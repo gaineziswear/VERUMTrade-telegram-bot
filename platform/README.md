@@ -1,24 +1,38 @@
 # VERUM AI Platform — Workstream
 
-This directory is the platform boundary being added alongside the existing VERUM Telegram trading bot. It is deliberately separate from the current Windows-oriented CLI and its SQLite runtime.
+This directory contains the first modular platform boundary alongside the existing VERUM Telegram trading engine. It remains separate from the current Windows-oriented CLI and SQLite runtime.
 
-## Current foundation
+## Implemented foundation
 
-- `src/publishing-policy.js`: deterministic publication gates shared by all channel adapters.
-- `test/publishing-policy.test.js`: unit tests for stale data, incomplete security coverage, invalid levels, free-tier caps and VIP access.
+- `src/publishing-policy.js`: deterministic publication gates and free/VIP entitlement policy.
+- `src/scheduler.js`: UTC quarter-hour slot calculation, lease-based scan coordinator contract and idempotent delivery outbox key.
+- `src/billing.js`: USD plan normalization, provider-neutral checkout request, USDT/USDC invoice grading and idempotent VIP entitlement extension.
+- `src/billing-config.js`: explicit stablecoin route allowlist and provider adapter contract.
+- `src/trade-journal.js`: user-reported fill normalization and FIFO realized P&L calculation.
 - `contracts/signal.v1.schema.json`: canonical signal payload contract.
-- `../docs/VERUM_AI_PLATFORM_ARCHITECTURE.md`: full architecture, entitlements, lifecycle, release phases and security controls.
+- `migrations/001_platform_core.sql`: PostgreSQL persistence tables for signals, subscriptions, payments, scan runs, outbox, quotas, fills and channel links.
+- `docs/VERUM_AI_PLATFORM_ARCHITECTURE.md`: product and system architecture.
+- `docs/BILLING_INTEGRATION.md`: provider and stablecoin payment safety contract.
+- `docs/PERSISTENCE_AND_TRANSACTIONS.md`: persistence, idempotency and transaction boundaries.
 
 ## Run domain tests
 
-From this directory, with Node.js 22.13 or newer:
+Requires Node.js 22 or newer:
 
 ```sh
 npm test
 ```
 
-## Implementation status
+GitHub Actions workflow: `.github/workflows/verum-platform.yml`.
 
-This is a foundation branch, not a production launch. The current publication policy is pure and deterministic, but the database-backed daily free quota, 15-minute distributed scheduler, adapters, subscriptions, user authentication, web UI and WhatsApp compliance workflow still need implementation and integration tests.
+## Current validation
 
-The existing signal engine is still the source of strategy decisions. AI components may explain and enrich those decisions, but may not override hard risk gates or invent market levels. Paper/shadow mode remains the default until forward-test evidence supports release.
+The Node 22 platform domain test workflow has completed successfully on the current feature branch. The PostgreSQL migration has not yet been applied to a live database.
+
+## Not yet production-connected
+
+This is a tested domain foundation, not a production deployment. PostgreSQL/Redis adapters, persistent quota transactions, live scheduler worker, market-data adapters, payment provider, chain RPC verification, Telegram/Discord/WhatsApp adapters, authentication, role synchronization and web dashboard remain to be integrated.
+
+No payment processor, stablecoin receiving wallet, token contract or network route is configured. Configure and independently verify those before accepting funds. Fiat and stablecoin checkout must use provider-backed pricing and authenticated payment evidence.
+
+The existing VERUM strategy engine remains the source of trading decisions. AI agents may research and explain but cannot override deterministic risk gates or fabricate market levels. Paper/shadow mode remains the default until forward testing and release gates are satisfied.
