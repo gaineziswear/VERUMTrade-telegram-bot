@@ -9,10 +9,11 @@
 
 ## Stablecoin payment safety
 
-1. Create a unique invoice with a short expiry and a USD-denominated quote.
-2. Resolve the exact asset/network/token contract/recipient from the configured allowlist.
-3. A chain adapter independently verifies the transaction, token contract, recipient, amount, successful status, finality and confirmation depth.
-4. The billing domain rejects incomplete verification, underpayment, overpayment, late payment and duplicate payment references from automatic activation.
+1. Obtain a short-lived, provider-backed USD-per-token quote for USDT or USDC; do not assume a stablecoin is exactly USD 1.00.
+2. Create a unique invoice with a short expiry and snapshot the quote provider, rate, USD amount and token amount.
+3. Resolve the exact asset/network/token contract/recipient from the configured allowlist.
+4. A chain adapter independently verifies the transaction, token contract, recipient, amount, successful status, finality and confirmation depth.
+5. The billing domain rejects incomplete verification, underpayment, overpayment, late payment and duplicate payment references from automatic activation.
 5. Overpayments and late payments enter manual reconciliation. Underpayments do not activate VIP.
 6. Apply the payment reference and entitlement update in one database transaction with a unique constraint.
 7. Keep invoice, payment and entitlement audit records. Never accept a client-supplied transaction hash as proof of payment.
