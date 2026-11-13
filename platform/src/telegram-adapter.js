@@ -95,18 +95,20 @@ export function createTelegramAdapter({
       };
     },
 
-    async sendStarsInvoice({ chatId, title, description, payload, amountStars } = {}) {
-      if ((typeof chatId !== "string" && typeof chatId !== "number") || String(chatId).trim() === "") throw new TypeError("A Telegram chatId is required");
+    async createStarsInvoiceLink({ title, description, payload, amountStars } = {}) {
       if (typeof title !== "string" || !title.trim() || title.length > 32) throw new TypeError("Invoice title must be 1-32 characters");
       if (typeof description !== "string" || !description.trim() || description.length > 255) throw new TypeError("Invoice description must be 1-255 characters");
       if (typeof payload !== "string" || payload.length < 1 || payload.length > 128) throw new TypeError("Invoice payload must be 1-128 characters");
       if (!Number.isSafeInteger(amountStars) || amountStars < 5 || amountStars > 10000) throw new RangeError("Stars amount must be an integer from 5 to 10000");
-      const result = await request("sendInvoice", {
-        chat_id: chatId, title, description, payload, currency: "XTR",
+      const invoiceLink = await request("createInvoiceLink", {
+        title, description, payload, currency: "XTR",
         prices: [{ label: title, amount: amountStars }],
         subscription_period: 2592000,
       });
-      return { messageId: result.message_id, chatId: result.chat?.id ?? chatId };
+      if (typeof invoiceLink !== "string" || !invoiceLink.startsWith("https://t.me/")) {
+        throw apiError(null, { description: "Telegram returned an invalid Stars invoice link" });
+      }
+      return { invoiceLink };
     },
 
     async answerPreCheckoutQuery({ queryId, ok, errorMessage } = {}) {
