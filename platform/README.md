@@ -6,9 +6,9 @@ This directory contains the first modular platform boundary alongside the existi
 
 - `src/publishing-policy.js`: deterministic publication gates and free/VIP entitlement policy.
 - `src/scheduler.js`: UTC quarter-hour slot calculation, lease-based scan coordinator contract and idempotent delivery outbox key.
-- `src/billing.js`: USD plan normalization, provider-neutral checkout request, USDT/USDC invoice grading and idempotent VIP entitlement extension.
+- `src/billing.js`: USD plan normalization, provider-neutral checkout request, USDT/USDC invoice grading and idempotent VIP entitlement extension.\n- `src/stars-billing.js`: Telegram Stars (XTR) monthly invoice construction and strict pre-checkout/successful-payment validation for Telegram-delivered VIP access.
 - `src/billing-config.js`: explicit stablecoin route allowlist and provider adapter contract.
-- `src/trade-journal.js`: user-reported fill normalization and FIFO realized P&L calculation.\n- `src/telegram-adapter.js`: credential-injected Telegram Bot API client, bot identity check, message validation, normalized delivery receipts and explicit handling of ambiguous network outcomes.
+- `src/trade-journal.js`: user-reported fill normalization and FIFO realized P&L calculation.\n- `src/telegram-adapter.js`: credential-injected Telegram Bot API client, bot identity check, message validation, normalized delivery receipts and explicit handling of ambiguous network outcomes.\n- `docs/TELEGRAM_ACCESS_AND_PAYMENTS.md`: Telegram Stars compliance boundary, access-bot flow and TON payment separation.
 - `contracts/signal.v1.schema.json`: canonical signal payload contract.
 - `migrations/001_platform_core.sql`: PostgreSQL persistence tables for signals, subscriptions, payments, scan runs, outbox, quotas, fills and channel links.
 - `docs/VERUM_AI_PLATFORM_ARCHITECTURE.md`: product and system architecture.
@@ -31,7 +31,7 @@ The Node 22 platform domain test workflow has completed successfully on the curr
 
 ## Not yet production-connected
 
-This is a tested domain foundation, not a production deployment. PostgreSQL/Redis adapters, persistent quota transactions, live scheduler worker, market-data adapters, payment provider, chain RPC verification, Discord/WhatsApp adapters, authentication, role synchronization and web dashboard remain to be integrated. The Telegram adapter is a tested transport component only; it is not yet wired to the live worker or configured with production bot credentials and chat IDs.
+This is a tested domain foundation, not a production deployment. PostgreSQL/Redis adapters, persistent quota transactions, live scheduler worker, market-data adapters, payment provider, chain RPC verification, Discord/WhatsApp adapters, authentication, role synchronization and web dashboard remain to be integrated. The Telegram Stars domain contract is implemented and tested, but the dedicated access bot, webhook, database-backed payment processing, invite lifecycle and refund/support flows are not yet production-connected. The Telegram adapter is a tested transport component only; it is not yet wired to the live worker or configured with production bot credentials and chat IDs.
 
 No payment processor, stablecoin receiving wallet, token contract or network route is configured. Configure and independently verify those before accepting funds. Fiat and stablecoin checkout must use provider-backed pricing and authenticated payment evidence.
 
