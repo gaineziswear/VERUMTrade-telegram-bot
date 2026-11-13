@@ -4,25 +4,26 @@ import { createTelegramAdapter } from "../src/telegram-adapter.js";
 
 const ok = result => ({ ok: true, status: 200, json: async () => ({ ok: true, result }) });
 
-test("creates a recurring Telegram Stars invoice using XTR", async () => {
+test("creates a recurring Telegram Stars invoice link using XTR", async () => {
   let call;
   const adapter = createTelegramAdapter({
     botToken: "123:secret",
     fetchImpl: async (url, init) => {
       call = { url, payload: JSON.parse(init.body) };
-      return ok({ message_id: 5, chat: { id: 42 } });
+      return ok("https://t.me/$verum_invoice_link");
     },
   });
-  const receipt = await adapter.sendStarsInvoice({
-    chatId: 42, title: "VERUM VIP", description: "30-day access",
+  const invoice = await adapter.createStarsInvoiceLink({
+    title: "VERUM VIP", description: "30-day access",
     payload: "verum:stars:v1:invoice_123456", amountStars: 500,
   });
-  assert.equal(call.url.endsWith("/sendInvoice"), true);
+  assert.equal(call.url.endsWith("/createInvoiceLink"), true);
   assert.equal(call.payload.currency, "XTR");
-  assert.equal(call.payload.provider_token, undefined);
+  assert.equal("provider_token" in call.payload, false);
+  assert.equal("chat_id" in call.payload, false);
   assert.equal(call.payload.subscription_period, 2592000);
   assert.deepEqual(call.payload.prices, [{ label: "VERUM VIP", amount: 500 }]);
-  assert.deepEqual(receipt, { messageId: 5, chatId: 42 });
+  assert.deepEqual(invoice, { invoiceLink: "https://t.me/$verum_invoice_link" });
 });
 
 test("answers pre-checkout with an explicit decision", async () => {
