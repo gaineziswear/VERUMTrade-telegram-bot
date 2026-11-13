@@ -66,3 +66,28 @@ test("verifies bot identity without exposing the token", async () => {
 test("escapes untrusted text for Telegram HTML", () => {
   assert.equal(escapeTelegramHtml("<VERUM & friends>"), "&lt;VERUM &amp; friends&gt;");
 });
+
+
+test("creates a recurring Telegram Stars invoice link instead of sending a subscription invoice message", async () => {
+  let request;
+  const adapter = createTelegramAdapter({
+    botToken: "123:secret",
+    fetchImpl: async (url, init) => {
+      request = { url, payload: JSON.parse(init.body) };
+      return response({ ok: true, result: "https://t.me/$verum_invoice_link" });
+    },
+  });
+  const result = await adapter.createStarsInvoiceLink({
+    title: "VERUM VIP",
+    description: "30-day access",
+    payload: "verum:stars:v1:invoice_123456",
+    amountStars: 90,
+  });
+  assert.equal(request.url.endsWith("/createInvoiceLink"), true);
+  assert.equal(request.payload.currency, "XTR");
+  assert.equal(request.payload.subscription_period, 2592000);
+  assert.equal(request.payload.prices[0].amount, 90);
+  assert.equal("chat_id" in request.payload, false);
+  assert.equal("provider_token" in request.payload, false);
+  assert.deepEqual(result, { invoiceLink: "https://t.me/$verum_invoice_link" });
+});
