@@ -29,6 +29,7 @@ export function createStarsInvoice({ plan, telegramUserId, invoiceId = globalThi
     planId: String(plan.id),
     currency: STARS_CURRENCY,
     amountStars: plan.priceStars,
+    state: "pending",
     subscriptionPeriodSeconds: STARS_SUBSCRIPTION_PERIOD_SECONDS,
     payload,
     telegram: Object.freeze({
