@@ -28,7 +28,7 @@ The live service currently provides:
 - Telegram subscription-state webhook handling for cancellation, reactivation and failed renewal events.
 - Health checks that verify credentials, price, Signals group, webhook registration and subscription-update coverage.
 
-Checkout health is currently green, but no Stars payment or VIP entitlement has yet been recorded. Do not describe the paid access lifecycle as end-to-end tested until a real successful payment, invitation, cancellation/renewal and expiry path have been verified. The public bot may display the checkout link, but public marketing/scale-up should wait for that operational test.
+The underlying service configuration and webhook checks are healthy, but the explicit live-checkout switch is currently OFF. The bot refuses new invoice requests and rejects pre-checkout approvals while this switch is off. No Stars payment or VIP entitlement has yet been recorded. Do not enable public checkout until a real successful payment, invitation, cancellation/renewal, refund and expiry path have been verified.
 
 Telegram recurring Stars invoices must use the `createInvoiceLink` flow with XTR and the 30-day `subscription_period`; do not send recurring subscription invoices using `sendInvoice`. Bot-side cancellation is not exposed as a Bot API operation. The bot directs users to Telegram's subscription settings and records Telegram's subscription update events.
 
